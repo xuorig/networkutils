@@ -1,4 +1,4 @@
-package handlers
+package strategies
 
 import (
 	"fmt"
@@ -7,15 +7,17 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
+	"github.com/google/gopacket/pcap"
 )
 
-// ARPHandler takes care of handling ARP frames
+// ARP takes care of handling ARP frames
 // And displays info to users.
-type ARPHandler struct {
+type ARP struct {
+	handle *pcap.Handle
 }
 
 // Handle ..
-func (h ARPHandler) Handle(packet gopacket.Packet) {
+func (strategy ARP) Handle(packet gopacket.Packet) {
 	arpLayer := packet.Layer(layers.LayerTypeARP)
 	if arpLayer != nil {
 		arp := arpLayer.(*layers.ARP)

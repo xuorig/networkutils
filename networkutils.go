@@ -8,15 +8,13 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
-	"github.com/xuorig/networkutils/handlers"
+	"github.com/xuorig/networkutils/strategies"
 )
 
 var strategyToBPFFilter = map[string]string{
 	"all": "",
 	"arp": "arp",
 }
-
-var a = handlers.ARPHandler{}
 
 var (
 	promiscuous       = false
@@ -30,7 +28,7 @@ var (
 
 func main() {
 	devicePtr := flag.String("d", "eth0", "Name of the network device.")
-	strategy := flag.String("s", "all", "Type of traffic to listen")
+	strategyType := flag.String("s", "all", "Packet handling strategy")
 	flag.Parse()
 
 	// Open pcap device
@@ -41,12 +39,12 @@ func main() {
 	}
 	defer handle.Close()
 
-	setBPFFilterFromStrategy(*strategy, handle)
-	handler := handlers.NewHandler(*strategy)
+	setBPFFilterFromStrategy(*strategyType, handle)
+	strategy := strategies.NewStrategy(handle, *strategyType)
 
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		handler.Handle(packet)
+		strategy.Handle(packet)
 	}
 }
 
